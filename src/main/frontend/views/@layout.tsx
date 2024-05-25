@@ -22,7 +22,7 @@ export default function MainLayout() {
           <SideNav onNavigate={({ path }) => navigate(path!)} location={location}>
             {createMenuItems().map(({ to, title, icon }) => (
               <SideNavItem path={to} key={to}>
-                {icon ? <Icon src={icon} slot="prefix"></Icon> : <></>}
+                {icon ? <Icon icon={icon} slot="prefix" /> : <></>}
                 {title}
               </SideNavItem>
             ))}
