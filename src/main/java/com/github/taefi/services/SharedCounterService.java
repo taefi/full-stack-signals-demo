@@ -8,11 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @AnonymousAllowed
 @BrowserCallable
-public class CounterService {
+public class SharedCounterService {
 
     private final NumberSignal counter = new NumberSignal(0);
+
     @Autowired
-    private SignalsRegistry registry;
+    private SignalsRegistry registry; // TODO: This should be in EndpointInvoker
 
     public NumberSignal counter() {
         /*

@@ -336,7 +336,7 @@ class EventLog<R extends Signal = Signal> {
         this.fluxConnectionActive.value = event.detail.active
     };    
   
-    constructor(/*queue: EventQueueDescriptor<string>,*/signalMetaData: SignalQueue, options: SignalOptions, rootType: EntryType) {
+    constructor(signalMetaData: SignalQueue, options: SignalOptions, rootType: EntryType) {
         this.queue = {
           subscribe: SignalsHandler.subscribe,
           publish: SignalsHandler.update,
@@ -605,7 +605,7 @@ export class ValueSignal<T> extends SharedSignal<T> {
   }
 
   set value(value: T) {
-  this.set(value, true);
+    this.set(value, true);
   }
 
   set(value: T, eager: boolean): Promise<void> {
@@ -625,6 +625,17 @@ export class ValueSignal<T> extends SharedSignal<T> {
     // TODO detect accessing other signals and re-run if any of those are changed as well
     // TODO conditional on last change id for the signal rather than the value itself to avoid the ABA problem
     while(!(await this.compareAndSet(this.value, updater(this.value)))) { }
+  }
+}
+
+export class NumberSignal extends ValueSignal<number> {
+
+}
+
+export class NumberSignalQ extends EventLog<NumberSignal> {
+  constructor(signalMetaData: SignalQueue, initialValue?: number, options?: SignalOptions) {
+    options ??= { initialValue: initialValue ?? 0 };
+    super(signalMetaData, options, EntryType.VALUE);
   }
 }
 
