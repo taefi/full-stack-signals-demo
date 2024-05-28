@@ -3,7 +3,6 @@ package com.github.taefi.signals.core;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.Nonnull;
 import com.vaadin.hilla.Nullable;
 import reactor.core.publisher.Flux;
 

@@ -13,7 +13,6 @@ public class SignalsRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SignalsRegistry.class);
     private final WeakHashMap<UUID, SignalQueue<?>> signals = new WeakHashMap<>();
-    private static ApplicationContext applicationContext;
 
     public synchronized void register(SignalQueue<?> signal) {
         signals.put(signal.getId(), signal);
