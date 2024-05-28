@@ -12,7 +12,7 @@ const counter = await CounterService.counter();
 export default function NumberSignalView() {
 
   return (
-    <Button onClick={() => counter.update((value) => value + 1)}>
+    <Button onClick={() => counter.increment()}>
       Click count: { counter }
     </Button>
   );

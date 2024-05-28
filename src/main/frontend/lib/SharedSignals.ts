@@ -45,6 +45,7 @@ class DependencyTrackSignal<T = any> extends Signal<T> {
 export enum EntryType {
   VALUE,
   LIST,
+  NUMBER,
 }
 
 interface ModifiableEntry<T = any> {
@@ -348,7 +349,7 @@ class EventLog<R extends Signal = Signal> {
         if (rootType == EntryType.LIST)  {
           const listRoot: ListRoot = { head: null, tail: null };
           rootValue = listRoot;
-        } else if (rootType == EntryType.VALUE) {
+        } else if (rootType == EntryType.VALUE || rootType == EntryType.NUMBER) {
           rootValue = options.initialValue;
         } else {
           throw Error(rootType);
@@ -524,6 +525,9 @@ class EventLog<R extends Signal = Signal> {
         case EntryType.VALUE: {
           return new ValueSignal(key, internalSignal, this);
         }
+        case EntryType.NUMBER: {
+          return new NumberSignal(key, internalSignal, this);
+        }
         default: {
           throw new Error("Unsupported entry type: " + type);
         }
@@ -630,12 +634,23 @@ export class ValueSignal<T> extends SharedSignal<T> {
 
 export class NumberSignal extends ValueSignal<number> {
 
+  constructor(key: EntryId, internalSignal: Signal, eventLog: EventLog) {
+    super(key, internalSignal, eventLog);
+  }
+
+  async increment(delta?: number): Promise<void> {
+    delta ??= 1;
+    await this.compareAndSet(this.value, this.value + delta);
+  }
 }
 
 export class NumberSignalQ extends EventLog<NumberSignal> {
-  constructor(signalMetaData: SignalQueue, initialValue?: number, options?: SignalOptions) {
-    options ??= { initialValue: initialValue ?? 0 };
-    super(signalMetaData, options, EntryType.VALUE);
+  constructor(signalMetaData: SignalQueue, initialValue?: number, eager: boolean = true) {
+    const options: SignalOptions = {
+      delay: !eager,
+      initialValue: initialValue ?? 0,
+    };
+    super(signalMetaData, options, EntryType.NUMBER);
   }
 }
 
