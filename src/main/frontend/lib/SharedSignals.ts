@@ -1,9 +1,5 @@
-import { Subscription } from "@vaadin/hilla-frontend";
-import { ReadonlySignal, Signal, batch, computed, effect, signal, useSignal } from "@preact/signals-react";
-import connectClient from 'Frontend/generated/connect-client.default';
-import { ReactElement } from "react";
-import {SignalsHandler} from "Frontend/generated/endpoints";
-import SignalQueue from "Frontend/generated/com/github/taefi/signals/core/SignalQueue";
+import { ConnectClient, Subscription } from "@vaadin/hilla-frontend";
+import { ReadonlySignal, Signal, batch, computed, effect, signal } from "@preact/signals-react";
 
 const rootKey = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 
@@ -315,6 +311,7 @@ class DerivedState extends State {
 }
 
 class EventLog<R extends Signal = Signal> {
+    private readonly connectClient: ConnectClient;
     private readonly queue: EventQueueDescriptor<string>;
     private readonly options: { delay: boolean; };
 
@@ -328,7 +325,6 @@ class EventLog<R extends Signal = Signal> {
     private visualState = new DerivedState(this.confirmedState);
     private readonly internalSignals: Map<EntryId, DependencyTrackSignal> = new Map();
     private readonly externalSignals: Map<EntryId, Signal> = new Map();
-    private readonly signalMetaData: SignalQueue;
     
     private subscription?: Subscription<string>;
     private lastEvent?: string;
@@ -337,13 +333,10 @@ class EventLog<R extends Signal = Signal> {
         this.fluxConnectionActive.value = event.detail.active
     };    
   
-    constructor(signalMetaData: SignalQueue, options: SignalOptions, rootType: EntryType) {
-        this.queue = {
-          subscribe: SignalsHandler.subscribe,
-          publish: SignalsHandler.update,
-        };
+    constructor(queue: EventQueueDescriptor<string>, connectClient: ConnectClient, options: SignalOptions, rootType: EntryType) {
+        this.queue = queue;
         this.options = {...defaultOptions, ...options};
-        this.signalMetaData = signalMetaData;
+        this.connectClient = connectClient;
 
         let rootValue: any;
         if (rootType == EntryType.LIST)  {
@@ -385,7 +378,7 @@ class EventLog<R extends Signal = Signal> {
         }
         console.log("Opening connection");
     
-        this.subscription = this.queue.subscribe(this.signalMetaData.id, this.lastEvent).onNext(json => {
+        this.subscription = this.queue.subscribe(this.queue.id, this.lastEvent).onNext(json => {
             const event = JSON.parse(json) as StateEvent;
             this.lastEvent = event.id;
         
@@ -422,7 +415,7 @@ class EventLog<R extends Signal = Signal> {
             }
         });
     
-        connectClient.fluxConnection.addEventListener('state-changed', this.fluxStateChangeListener);        
+        this.connectClient.fluxConnection.addEventListener('state-changed', this.fluxStateChangeListener);
     }
     
     private disconnect() {
@@ -434,7 +427,7 @@ class EventLog<R extends Signal = Signal> {
         this.subscription.cancel();
         this.subscription = undefined;
 
-        connectClient.fluxConnection.removeEventListener('state-changed', this.fluxStateChangeListener);    
+        this.connectClient.fluxConnection.removeEventListener('state-changed', this.fluxStateChangeListener);
     }
 
     private updateSignals(diff: Entries) {
@@ -491,7 +484,7 @@ class EventLog<R extends Signal = Signal> {
         return new Promise((resolve, reject) => {
             this.pendingResults[event.id] = resolve;
         
-            const action = () => this.queue.publish(this.signalMetaData.id, JSON.stringify(event)).catch((error) => {
+            const action = () => this.queue.publish(this.queue.id, JSON.stringify(event)).catch((error) => {
                 if (latencyCompensate) {
                     this.removePendingChange(event);
                 }
@@ -567,6 +560,7 @@ abstract class SharedSignal<T> extends Computed<T> {
 }
 
 interface EventQueueDescriptor<T>  {
+  id: string;
   subscribe(signalId: string, lastId?: string): Subscription<T>;
   publish(signalId: string, event: T): Promise<void>;
 }
@@ -574,7 +568,7 @@ interface EventQueueDescriptor<T>  {
 interface FullSignalOptions {
   delay: boolean;
   initialValue: any;
-};
+}
 
 const defaultOptions : FullSignalOptions = {
   delay: false,
@@ -644,13 +638,13 @@ export class NumberSignal extends ValueSignal<number> {
   }
 }
 
-export class NumberSignalQ extends EventLog<NumberSignal> {
-  constructor(signalMetaData: SignalQueue, initialValue?: number, eager: boolean = true) {
+export class NumberSignalQueue extends EventLog<NumberSignal> {
+  constructor(queue: EventQueueDescriptor<string>, connectClient: ConnectClient, initialValue?: number, eager: boolean = true) {
     const options: SignalOptions = {
       delay: !eager,
       initialValue: initialValue ?? 0,
     };
-    super(signalMetaData, options, EntryType.NUMBER);
+    super(queue, connectClient, options, EntryType.NUMBER);
   }
 }
 
