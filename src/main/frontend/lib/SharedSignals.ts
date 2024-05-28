@@ -1,5 +1,5 @@
-import { ConnectClient, Subscription } from "@vaadin/hilla-frontend";
-import { ReadonlySignal, Signal, batch, computed, effect, signal } from "@preact/signals-react";
+import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
+import { type ReadonlySignal, Signal, batch, computed, effect, signal } from '@preact/signals-react';
 
 const rootKey = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 
@@ -12,30 +12,30 @@ declare module "@preact/signals-react" {
 }
 
 class DependencyTrackSignal<T = any> extends Signal<T> {
-    private readonly onSubscribe: () => void;
-    private readonly onUnsubscribe: () => void;
+  private readonly onSubscribe: () => void;
+  private readonly onUnsubscribe: () => void;
 
-    private subscribeCount = 0;
+  private subscribeCount = 0;
 
-    constructor (value: T | undefined, onSubscribe: () => void, onUnsubscribe: () => void) {
-      super(value);
-      this.onSubscribe = onSubscribe;
-      this.onUnsubscribe = onUnsubscribe;
-    }
-  
-    protected S(node: any): void {
-      super.S(node);
-      if (this.subscribeCount++ == 0) {
-        this.onSubscribe.call(null);
-      } 
-    }
+  constructor(value: T | undefined, onSubscribe: () => void, onUnsubscribe: () => void) {
+    super(value);
+    this.onSubscribe = onSubscribe;
+    this.onUnsubscribe = onUnsubscribe;
+  }
 
-    protected U(node: any): void {
-      super.U(node);
-      if (--this.subscribeCount == 0) {
-        this.onUnsubscribe.call(null);
-      } 
+  protected override S(node: any): void {
+    super.S(node);
+    if (this.subscribeCount++ == 0) {
+      this.onSubscribe.call(null);
     }
+  }
+
+  protected override U(node: any): void {
+    super.U(node);
+    if (--this.subscribeCount == 0) {
+      this.onUnsubscribe.call(null);
+    }
+  }
 }
 
 export enum EntryType {
@@ -48,7 +48,7 @@ interface ModifiableEntry<T = any> {
   value: T;
   next: EntryId | null;
   prev: EntryId | null;
-  type: EntryType;  
+  type: EntryType;
 }
 
 type Entry<T = any> = Readonly<ModifiableEntry<T>>;
@@ -86,7 +86,7 @@ interface SnapshotEvent extends StateEvent {
     id: EntryId;
     next: EntryId | null;
     prev: EntryId | null;
-    value: any;    
+    value: any;
   }[];
 }
 
@@ -241,7 +241,7 @@ class State {
     for(const [key, entry] of source.entries.entries()) {
         entry ? this.entries.set(key, entry) : this.delete(key);
     }
-  }    
+  }
 
   insert(id: EntryId, entry : Entry) {
     if (this.get(id)) throw Error(id);
@@ -267,47 +267,47 @@ class State {
 }
 
 class DerivedState extends State {
-    parent: State;
+  parent: State;
 
-    constructor(parent: State) {
-        super();
-        this.parent = parent;
+  constructor(parent: State) {
+    super();
+    this.parent = parent;
+  }
+
+  override delete(id: EntryId): void {
+    this.entries.set(id, undefined);
+  }
+
+  override get(id: EntryId): Entry | undefined {
+    return super.get(id) || this.parent.get(id);
+  }
+
+  collectTouchedKeys(touchedKeys: Set<EntryId>) {
+    for (const key of this.entries.keys()) {
+      touchedKeys.add(key);
     }
 
-    delete(id: EntryId): void {
-        this.entries.set(id, undefined);
+    if (this.parent instanceof DerivedState) {
+      this.parent.collectTouchedKeys(touchedKeys);
     }
+  }
 
-    get(id: EntryId): Entry | undefined {
-        return super.get(id) || this.parent.get(id);
-    }
+  collectDiff(oldState: DerivedState): Entries {
+    const touchedKeys = new Set<EntryId>();
+    this.collectTouchedKeys(touchedKeys);
+    oldState.collectTouchedKeys(touchedKeys);
 
-    collectTouchedKeys(touchedKeys: Set<EntryId>) {
-        for(const key of this.entries.keys()) {
-            touchedKeys.add(key);
-        }
+    const diff: Entries = new Map();
+    touchedKeys.forEach((key) => {
+      const oldEntry = oldState.get(key);
+      const newEntry = this.get(key);
+      if (oldEntry !== newEntry) {
+        diff.set(key, newEntry);
+      }
+    });
 
-        if (this.parent instanceof DerivedState) {
-            this.parent.collectTouchedKeys(touchedKeys);
-        }
-    }
-
-    collectDiff(oldState : DerivedState): Entries {
-        const touchedKeys = new Set<EntryId>();
-        this.collectTouchedKeys(touchedKeys);
-        oldState.collectTouchedKeys(touchedKeys);
-
-        const diff: Entries = new Map();
-        touchedKeys.forEach((key) => {
-            const oldEntry = oldState.get(key);
-            const newEntry = this.get(key);
-            if (oldEntry !== newEntry) {
-                diff.set(key, newEntry);
-            }
-        });
-
-        return diff;
-    }
+    return diff;
+  }
 }
 
 class EventLog<R extends Signal = Signal> {
@@ -325,14 +325,14 @@ class EventLog<R extends Signal = Signal> {
     private visualState = new DerivedState(this.confirmedState);
     private readonly internalSignals: Map<EntryId, DependencyTrackSignal> = new Map();
     private readonly externalSignals: Map<EntryId, Signal> = new Map();
-    
+
     private subscription?: Subscription<string>;
     private lastEvent?: string;
 
     private fluxStateChangeListener = (event: CustomEvent<{active: boolean}>) => {
         this.fluxConnectionActive.value = event.detail.active
-    };    
-  
+    };
+
     constructor(queue: EventQueueDescriptor<string>, connectClient: ConnectClient, options: SignalOptions, rootType: EntryType) {
         this.queue = queue;
         this.options = {...defaultOptions, ...options};
@@ -366,7 +366,7 @@ class EventLog<R extends Signal = Signal> {
         // Update asynchronously to avoid side effects when this is run inside compute()
         setTimeout(() => this.subscribeCount.value++, 0);
       }
-      
+
     private unsubscribe(): void {
         // Update asynchronously to avoid side effects when this is run inside compute()
         setTimeout(() => this.subscribeCount.value--, 0);
@@ -377,19 +377,19 @@ class EventLog<R extends Signal = Signal> {
             return;
         }
         console.log("Opening connection");
-    
+
         this.subscription = this.queue.subscribe(this.queue.id, this.lastEvent).onNext(json => {
             const event = JSON.parse(json) as StateEvent;
             this.lastEvent = event.id;
-        
+
             if (event.id in this.pendingChanges) {
                 delete this.pendingChanges[event.id];
             }
-            
+
             // Create as a derived state so we can diff against the old confirmed state
             const newConfirmedState = new DerivedState(this.confirmedState);
             const accepted = newConfirmedState.evaluate(event);
-            
+
             if (accepted) {
                 // Create a new visible state by applying the current change + pending changes against the confirmed state
                 const newVisualState = new DerivedState(newConfirmedState);
@@ -397,7 +397,7 @@ class EventLog<R extends Signal = Signal> {
 
                 // Create a diff between old and new visible state
                 const diff = newVisualState.collectDiff(this.visualState);
-                
+
                 // Update confirmed state based on the current change
                 this.confirmedState.ingest(newConfirmedState);
                 newVisualState.parent = this.confirmedState;
@@ -414,10 +414,10 @@ class EventLog<R extends Signal = Signal> {
                 delete this.pendingResults[event.id];
             }
         });
-    
+
         this.connectClient.fluxConnection.addEventListener('state-changed', this.fluxStateChangeListener);
     }
-    
+
     private disconnect() {
         if (!this.subscription) {
             return;
@@ -461,9 +461,9 @@ class EventLog<R extends Signal = Signal> {
 
             this.visualState.ingest(newVisualState);
             this.updateSignals(diff);
-        }      
+        }
     }
-      
+
     private removePendingChange(event: StateEvent) {
         delete this.pendingChanges[event.id];
 
@@ -476,14 +476,14 @@ class EventLog<R extends Signal = Signal> {
 
         this.updateSignals(diff);
     }
-    
+
     public publish(event : StateEvent, latencyCompensate : boolean): Promise<boolean> {
         if (latencyCompensate) {
             this.addPendingChange(event);
         }
         return new Promise((resolve, reject) => {
             this.pendingResults[event.id] = resolve;
-        
+
             const action = () => this.queue.publish(this.queue.id, JSON.stringify(event)).catch((error) => {
                 if (latencyCompensate) {
                     this.removePendingChange(event);
@@ -502,7 +502,7 @@ class EventLog<R extends Signal = Signal> {
       return this.externalSignals.get(rootKey) as R;
     }
 
-    getEntry(key: string): Entry | undefined { 
+    getEntry(key: string): Entry | undefined {
       return this.visualState.get(key);
     }
 
@@ -551,7 +551,7 @@ function Computed <T>(this: Computed<T>, compute: () => T) {
 Computed.prototype = (computed(() => {}) as any).__proto__;
 
 abstract class SharedSignal<T> extends Computed<T> {
-  readonly key: EntryId;
+  override readonly key: EntryId;
 
   constructor(compute: () => T, key: EntryId) {
     super(compute);
@@ -576,7 +576,7 @@ const defaultOptions : FullSignalOptions = {
 }
 
 type SignalOptions = Partial<FullSignalOptions>;
-  
+
 interface ListInsertResult<S extends SharedSignal<any>> {
   readonly promise: Promise<boolean>,
 
@@ -593,28 +593,33 @@ export class ValueSignal<T> extends SharedSignal<T> {
   private readonly eventLog: EventLog;
 
   constructor(key: EntryId, internalSignal: Signal, eventLog: EventLog) {
-    super(() =>  internalSignal.value, key);
+    super(() => internalSignal.value, key);
 
     this.eventLog = eventLog;
   }
 
-  get value() {
+  override get value() {
     return super.value;
   }
 
-  set value(value: T) {
+  override set value(value: T) {
     this.set(value, true);
   }
 
   set(value: T, eager: boolean): Promise<void> {
     const id = crypto.randomUUID();
-    const event : SetEvent = { id, set: this.key, value};
-    return this.eventLog.publish(event, eager).then(_ => undefined);
+    const event: SetEvent = { id, set: this.key, value };
+    return this.eventLog.publish(event, eager).then((_) => undefined);
   }
 
   compareAndSet(expectedValue: T, newValue: T, eager = true): Promise<boolean> {
     const id = crypto.randomUUID();
-    const event : SetEvent = { id, set: this.key, value: newValue, conditions: [{id: this.key, value: expectedValue}]};
+    const event: SetEvent = {
+      id,
+      set: this.key,
+      value: newValue,
+      conditions: [{ id: this.key, value: expectedValue }],
+    };
 
     return this.eventLog.publish(event, eager);
   }
@@ -622,7 +627,7 @@ export class ValueSignal<T> extends SharedSignal<T> {
   async update(updater: (value: T) => T): Promise<void> {
     // TODO detect accessing other signals and re-run if any of those are changed as well
     // TODO conditional on last change id for the signal rather than the value itself to avoid the ABA problem
-    while(!(await this.compareAndSet(this.value, updater(this.value)))) { }
+    while (!(await this.compareAndSet(this.value, updater(this.value)))) {}
   }
 }
 
@@ -716,13 +721,13 @@ export class ListSignal<T = any, S extends ValueSignal<T> = ValueSignal<T>> exte
   insertBefore(reference: EntryReference<S>, value: T): ListInsertResult<S> {
     const id = crypto.randomUUID();
     const event: InsertEvent = { entry: this.key, id, direction: "BEFORE", reference: getKey(reference), value };
-    return {promise: this.eventLog.publish(event, true), signal: this.get(id)!};    
+    return {promise: this.eventLog.publish(event, true), signal: this.get(id)!};
   }
 
   insertAfter(reference: EntryReference<S>, value: T): ListInsertResult<S> {
     const id = crypto.randomUUID();
     const event: InsertEvent = { entry: this.key, id, direction: "AFTER", reference: getKey(reference), value };
-    return {promise: this.eventLog.publish(event, true), signal: this.get(id)!};    
+    return {promise: this.eventLog.publish(event, true), signal: this.get(id)!};
   }
 
   remove(child: EntryReference<S>) {
