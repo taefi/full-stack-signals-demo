@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 @BrowserCallable
 public class SharedCounterService {
 
-    private final NumberSignal counter = new NumberSignal(10);
+    private final NumberSignal counter = new NumberSignal(0);
+
+    private final NumberSignal anotherCounter = new NumberSignal(20);
 
     @Autowired
     private SignalsRegistry registry; // TODO: This should be in EndpointInvoker
@@ -24,5 +26,16 @@ public class SharedCounterService {
             registry.register(counter);
         }
         return counter;
+    }
+
+    public NumberSignal anotherCounter() {
+        /*
+         * Register the counter signal if it is not already registered.
+         * TODO: This should be in EndpointInvoker
+         */
+        if (!registry.contains(anotherCounter.getId())) {
+            registry.register(anotherCounter);
+        }
+        return anotherCounter;
     }
 }
