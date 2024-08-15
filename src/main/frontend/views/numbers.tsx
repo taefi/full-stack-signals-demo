@@ -1,15 +1,15 @@
 import { ViewConfig } from '@vaadin/hilla-file-router/types.js';
 import { Button } from '@vaadin/react-components/Button.js';
-import { MySignalProviderService } from "Frontend/helper/MySignalProviderService";
 import { VerticalLayout } from "@vaadin/react-components/VerticalLayout";
+import { NumberSignalService } from "Frontend/generated/endpoints.js";
 
 export const config: ViewConfig = {
   menu: { order: 0, icon: 'vaadin:bell', title: 'Number Signal'},
   title: 'Number Signal'
 };
 
-const counter = MySignalProviderService.counter();
-const sharedValue = MySignalProviderService.sharedValue();
+const counter = NumberSignalService.counter();
+const sharedValue = NumberSignalService.sharedValue();
 
 export default function NumberSignalView() {
 

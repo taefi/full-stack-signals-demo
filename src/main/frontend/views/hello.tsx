@@ -2,20 +2,26 @@ import {VerticalLayout} from "@vaadin/react-components/VerticalLayout";
 import {TextField} from "@vaadin/react-components/TextField";
 import {Button} from "@vaadin/react-components/Button";
 import {HelloWorldService} from "Frontend/generated/endpoints";
-import {useState} from "react";
+import '@vaadin/icons';
+import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 import {useSignal} from "@vaadin/hilla-react-signals";
+import {Icon} from "@vaadin/react-components";
+import {ViewConfig} from "@vaadin/hilla-file-router/types.js";
+
+export const config: ViewConfig = {
+  menu: { order: 1, icon: 'vaadin:handshake' },
+  title: 'Hello World',
+};
+
 
 export default function HelloView() {
 
   const name = useSignal('');
   const notifications = useSignal<string[]>([]);
-  // const [name, setName] = useState('');
-  // const [notifications, setNotifications] = useState([] as string[]);
 
   return (
     <>
       <VerticalLayout theme="padding spacing">
-        <h3>Hilla View</h3>
         <TextField
           label="Your name"
           onValueChanged={(e) => {
@@ -27,7 +33,9 @@ export default function HelloView() {
             const serverResponse = await HelloWorldService.sayHello(name.value);
             notifications.value = [...notifications.value, serverResponse];
           }}
-        > Say hello</Button>
+        > Say hello
+          <Icon icon="lumo:play"/>
+        </Button>
         {notifications.value.map((notification, index) => (
           <p key={index}>{notification}</p>
         ))}
