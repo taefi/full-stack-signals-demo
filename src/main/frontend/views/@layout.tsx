@@ -18,17 +18,17 @@ effect(() => {
 // Publish for Vaadin to use
 (window as any).Vaadin.documentTitleSignal = documentTitleSignal;
 
-const selectMenu: ValueSignal<string | undefined> = MenuService.selectedMenuSignal();
+// const selectMenu: ValueSignal<string | undefined> = MenuService.selectedMenuSignal();
 
 export default function MainLayout() {
   const currentTitle = useViewConfig()?.title ?? defaultTitle;
   const navigate = useNavigate();
   const location = useLocation();
 
-   useEffect(() => {
+  /*useEffect(() => {
     documentTitleSignal.value = currentTitle;
     navigate(selectMenu.value!);
-  }, [currentTitle, selectMenu.value]);
+  }, [currentTitle, selectMenu.value]);*/
 
   const { state, logout } = useAuth();
   const profilePictureUrl =
@@ -41,7 +41,7 @@ export default function MainLayout() {
       <div slot="drawer" className="flex flex-col justify-between h-full p-m">
         <header className="flex flex-col gap-m">
           <span className="font-semibold text-l">My App</span>
-          <SideNav onNavigate={({ path }) => selectMenu.value = path!} location={location}>
+          <SideNav onNavigate={({ path }) => navigate(path!)} location={location}>
             {createMenuItems().map(({ to, title, icon }) => (
               <SideNavItem path={to} key={to} >
                 {icon ? <Icon icon={icon} slot="prefix"></Icon> : <></>}
