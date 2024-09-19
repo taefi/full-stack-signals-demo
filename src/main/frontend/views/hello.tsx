@@ -1,7 +1,7 @@
 import {VerticalLayout} from "@vaadin/react-components/VerticalLayout";
 import {TextField} from "@vaadin/react-components/TextField";
 import {Button} from "@vaadin/react-components/Button";
-import {HelloWorldService} from "Frontend/generated/endpoints";
+import {HelloWorldService, TestFlux} from "Frontend/generated/endpoints";
 import '@vaadin/icons';
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 import {useSignal} from "@vaadin/hilla-react-signals";
@@ -9,10 +9,11 @@ import {Icon} from "@vaadin/react-components";
 import {ViewConfig} from "@vaadin/hilla-file-router/types.js";
 
 export const config: ViewConfig = {
-  menu: { order: 1, icon: 'vaadin:handshake' },
+  menu: { order: 6, icon: 'vaadin:handshake' },
   title: 'Hello World',
 };
 
+// const subs = TestFlux.testFlux('test', true);
 
 export default function HelloView() {
 
@@ -36,9 +37,11 @@ export default function HelloView() {
         > Say hello
           <Icon icon="lumo:play"/>
         </Button>
-        {notifications.value.map((notification, index) => (
-          <p key={index}>{notification}</p>
-        ))}
+        <ul>
+          {notifications.value.map((notification, index) => (
+            <li key={index}>{notification}</li>
+          ))}
+        </ul>
       </VerticalLayout>
     </>
   );

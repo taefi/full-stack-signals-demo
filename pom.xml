@@ -11,8 +11,8 @@
 
     <properties>
         <java.version>21</java.version>
-        <vaadin.version>24.5.0.alpha9</vaadin.version>
-        <hilla.version>24.5-SNAPSHOT</hilla.version>
+        <vaadin.version>24.5.0.beta1</vaadin.version>
+        <!--<hilla.version>24.5-SNAPSHOT</hilla.version>-->
     </properties>
 
     <parent>
@@ -43,13 +43,13 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
+            <!--<dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>hilla-bom</artifactId>
                 <version>${hilla.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
+            </dependency>-->
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-bom</artifactId>
@@ -61,14 +61,9 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>hilla-engine-core</artifactId>
-            <version>24.5-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>hilla-endpoint</artifactId>
             <version>24.5-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -76,6 +71,12 @@
             <artifactId>hilla</artifactId>
             <version>${hilla.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-endpoint</artifactId>
+            <version>24.5-SNAPSHOT</version>
+        </dependency>-->
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin</artifactId>

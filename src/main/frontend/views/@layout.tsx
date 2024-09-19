@@ -1,5 +1,5 @@
 import { createMenuItems, useViewConfig } from '@vaadin/hilla-file-router/runtime.js';
-import { effect, signal } from '@vaadin/hilla-react-signals';
+import {effect, signal, type ValueSignal} from '@vaadin/hilla-react-signals';
 import { AppLayout, DrawerToggle, Icon, SideNav, SideNavItem } from '@vaadin/react-components';
 import { Avatar } from '@vaadin/react-components/Avatar.js';
 import { Button } from '@vaadin/react-components/Button.js';
@@ -7,6 +7,7 @@ import { useAuth } from 'Frontend/util/auth.js';
 import { Suspense, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import '@vaadin/icons';
+import {MenuService} from "Frontend/generated/endpoints.js";
 
 const defaultTitle = document.title;
 const documentTitleSignal = signal('');
@@ -17,14 +18,17 @@ effect(() => {
 // Publish for Vaadin to use
 (window as any).Vaadin.documentTitleSignal = documentTitleSignal;
 
+const selectMenu: ValueSignal<string | undefined> = MenuService.selectedMenuSignal();
+
 export default function MainLayout() {
   const currentTitle = useViewConfig()?.title ?? defaultTitle;
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
+   useEffect(() => {
     documentTitleSignal.value = currentTitle;
-  }, [currentTitle]);
+    navigate(selectMenu.value!);
+  }, [currentTitle, selectMenu.value]);
 
   const { state, logout } = useAuth();
   const profilePictureUrl =
@@ -37,9 +41,9 @@ export default function MainLayout() {
       <div slot="drawer" className="flex flex-col justify-between h-full p-m">
         <header className="flex flex-col gap-m">
           <span className="font-semibold text-l">My App</span>
-          <SideNav onNavigate={({ path }) => navigate(path!)} location={location}>
+          <SideNav onNavigate={({ path }) => selectMenu.value = path!} location={location}>
             {createMenuItems().map(({ to, title, icon }) => (
-              <SideNavItem path={to} key={to}>
+              <SideNavItem path={to} key={to} >
                 {icon ? <Icon icon={icon} slot="prefix"></Icon> : <></>}
                 {title}
               </SideNavItem>
