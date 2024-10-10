@@ -5,7 +5,7 @@ import {NumberField, type TextFieldValueChangedEvent} from "@vaadin/react-compon
 import {useSignal, ValueSignal} from "@vaadin/hilla-react-signals";
 import {ViewConfig} from "@vaadin/hilla-file-router/types.js";
 
-const personSignal = PersonService.personSignal(false/*{defaultValue: {name: '', age: 0}}*/);
+const personSignal = PersonService.personSignal(false, {defaultValue: {name: '', age: 0}});
 
 export const config: ViewConfig = {
   menu: { order: 4, icon: 'vaadin:hands-up' },
