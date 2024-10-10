@@ -15,7 +15,7 @@ function getRelativePosition(event: MouseEvent): Position {
   return { x: event.clientX - rect.left, y: event.clientY - rect.top};
 }
 
-const sharedCursor = CursorService.sharedCursor(/*{defaultValue: undefined}*/);
+const sharedCursor = CursorService.sharedCursor({defaultValue: undefined});
 
 export default function Cursors() {
 

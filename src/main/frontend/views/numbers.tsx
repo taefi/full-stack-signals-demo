@@ -12,7 +12,7 @@ export const config: ViewConfig = {
 
 const counter = NumberSignalService.counter();
 
-const votingStarted = NumberSignalService.startTrigger(/*{defaultValue: undefined}*/);
+const votingStarted = NumberSignalService.startTrigger({defaultValue: undefined});
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -40,7 +40,7 @@ export default function NumberSignalView() {
     <VerticalLayout theme='padding'>
       <div>
         <span style={{paddingRight: '10px'}}>Vote count: {counter}</span>
-        <Button onClick={() => counter.incrementBy(1)}>
+        <Button onClick={() => counter.value++}>
           Vote Up!
         </Button>
       </div>
