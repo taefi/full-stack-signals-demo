@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <vaadin.version>24.5.0.rc1</vaadin.version>
+        <vaadin.version>24.5.0</vaadin.version>
     </properties>
 
     <parent>
@@ -122,7 +122,6 @@
                     <parser>
                         <packages>
                             <package>com.github.taefi.services</package>
-                            <!--<package>com.vaadin.hilla.signals.handler</package>-->
                         </packages>
                     </parser>
                 </configuration>
