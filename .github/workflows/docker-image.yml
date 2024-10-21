@@ -42,12 +42,26 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Generate date-based version
         id: version
         run: echo "VERSION=$(date +'%Y.%m.%d-%H.%M.%S')" >> $GITHUB_ENV
+
+      # Sanitize the branch name for Docker tags
+      - name: Sanitize branch name
+        id: vars
+        run: |
+          SANITIZED_BRANCH=$(echo "${GITHUB_REF_NAME}" | sed 's/\//-/g' | tr '[:upper:]' '[:lower:]')
+          echo "SANITIZED_BRANCH=$SANITIZED_BRANCH" >> $GITHUB_ENV
+
+      # Concatenate the branch name and version date
+      - name: Concatenate branch name and version date
+        id: concatenated_tag
+        run: |
+          TAG="${SANITIZED_BRANCH}-${VERSION}"
+          echo "TAG=$TAG" >> $GITHUB_ENV
 
       # Build and push Docker image
       - name: Build and push Docker image
@@ -56,10 +70,9 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
-            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:${{ env.VERSION }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:${{ env.TAG }}
 
       # Verify Docker image
       - name: Verify Docker image
         run: |
-          docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:${{ env.VERSION }}
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:${{ env.TAG }}
