@@ -17,7 +17,11 @@ export const config: ViewConfig = {
   loginRequired: true,
 };
 
-function MessageEditor({message, onRemove, isMyMessage}: { message: ValueSignal<Message>, onRemove: (signal: ValueSignal<Message>) => void, isMyMessage: boolean }) {
+function MessageEditor({message, onRemove, isMyMessage}: {
+  message: ValueSignal<Message>,
+  onRemove: (signal: ValueSignal<Message>) => void,
+  isMyMessage: boolean
+}) {
   return (
     <HorizontalLayout theme='spacing' style={{ alignItems: 'BASELINE' }}>
       <TextArea readonly={true} label={isMyMessage ? 'Me:' : message.value.author + ':'} value={message.value.text} />
@@ -32,6 +36,8 @@ function ChatComponent({ username } : { username: string }) {
   return (
     <VerticalLayout theme='padding'>
       <h3>Welcome {username}!</h3>
+      <span>The word "bad" is not allowed in this chat, and the message will not be accepted!</span>
+      <span>But, you can be creative by saying things like "b-a-d" or "B A D"</span>
       <Scroller style={{height: '70vh',
         width: '100%',
         borderBottom: '1px solid var(--lumo-contrast-20pct)',

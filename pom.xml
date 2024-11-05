@@ -69,12 +69,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>hilla</artifactId>
             <version>${hilla.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>hilla-endpoint</artifactId>
-            <version>24.5-SNAPSHOT</version>
-        </dependency>-->
+            <version>24.6-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
