@@ -2,17 +2,19 @@ package com.github.taefi.data;
 
 import jakarta.validation.constraints.NotEmpty;
 
+import java.time.LocalDate;
+
 public class Person {
 
     private String name;
-    private int age;
+    private LocalDate birthDate;
 
     public Person() {
     }
 
-    public Person(String name, int age) {
+    public Person(String name, LocalDate birthDate) {
         this.name = name;
-        this.age = age;
+        this.birthDate = birthDate;
     }
 
     @NotEmpty
@@ -24,11 +26,11 @@ public class Person {
         return name;
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public LocalDate getBirthDate() {
+        return birthDate;
     }
 
-    public int getAge() {
-        return age;
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
     }
 }

@@ -12,14 +12,15 @@ const isHigh = signal(true);
 
 let sharedValue: NumberSignal;
 effect(() => {
-  sharedValue = NumberSignalService.sharedValue(isHigh.value, "a.valid@email.com");
+  sharedValue = NumberSignalService.sharedValue(isHigh.value);
 });
 
-export default function params() {
+export default function Params() {
   return (
     <div>
       <h3>{isHigh.value ? 'High' : 'Low'} Value: {sharedValue.value}</h3>
-      <Button onClick={() => sharedValue.incrementBy(isHigh.value ? 1 : -1)}>{isHigh.value ? 'Increase' : 'Decrease'}</Button>
+      <Button onClick={() => sharedValue.incrementBy(isHigh.value ? 1 : -1)
+      }>{isHigh.value ? 'Increase' : 'Decrease'}</Button>
       <br/>
       <Button onClick={() => isHigh.value = !isHigh.value}>Toggle High/Low</Button>
     </div>

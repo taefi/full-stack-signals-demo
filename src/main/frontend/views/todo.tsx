@@ -8,7 +8,7 @@ import {
   HorizontalLayout,
   VerticalLayout
 } from "@vaadin/react-components";
-import { effect, useSignal, type ValueSignal} from "@vaadin/hilla-react-signals";
+import {useSignal, type ValueSignal} from "@vaadin/hilla-react-signals";
 import {ViewConfig} from "@vaadin/hilla-file-router/types.js";
 import {useEffect} from "react";
 import Spinner from "Frontend/views/_spinner.js";
@@ -36,10 +36,7 @@ function TodoComponent({todoItem, onRemove}: {
   return rendering.value ? <Spinner /> : (
     <HorizontalLayout theme='spacing'
                       style={{ alignItems: 'BASELINE', paddingLeft: '10px' }} >
-      {editing.value
-        ? <TextArea value={todoText.value}
-                    onValueChanged={(e) => todoText.value = e.detail.value}/>
-        : <Checkbox label={todoItem.value.text}
+      <Checkbox label={todoItem.value.text}
                     checked={todoItem.value.done}
                     onCheckedChanged={(e) => {
                       todoItem.value = {
@@ -47,7 +44,10 @@ function TodoComponent({todoItem, onRemove}: {
                         done: e.detail.value
                       };
                     }}/>
-      }
+      {editing.value
+        ? <TextArea value={todoText.value}
+                    onValueChanged={(e) => todoText.value = e.detail.value}/>
+        : null}
       <Button theme="icon"
               hidden={editing.value}
               onClick={() => {
@@ -64,10 +64,10 @@ function TodoComponent({todoItem, onRemove}: {
       <Button theme="icon"
               hidden={!editing.value}
               onClick={() => {
-                todoItem.value = {
+                todoItem.replace(todoItem.value, {
                   text: todoText.value,
                   done: todoItem.value.done
-                };
+                });
                 editing.value = false;
               }}>
         <Icon icon="vaadin:check" />
@@ -83,10 +83,6 @@ function TodoComponent({todoItem, onRemove}: {
     </HorizontalLayout>
   );
 }
-
-effect(() => {
-  todoItems.value
-});
 
 export default function TodoListView(){
   const newTodoValue = useSignal<string>('');

@@ -4,6 +4,10 @@ import com.github.taefi.security.AuthenticatedUser;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.signals.ListSignal;
+import com.vaadin.hilla.signals.operation.ListInsertOperation;
+import com.vaadin.hilla.signals.operation.ListRemoveOperation;
+import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
+import com.vaadin.hilla.signals.operation.SetValueOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
 
 @BrowserCallable
@@ -13,17 +17,24 @@ public class TodoService {
     record TodoItem(String text, boolean done) {}
 
     private final ListSignal<TodoItem> todoItems = new ListSignal<>(TodoItem.class)
-            .withInsertionValidator(operation ->
-                    operation.value().text().length() <= 5 ?
-                            ValidationResult.ok() :
-                            ValidationResult.rejected("Long todo items are not allowed"));
+            .withOperationValidator(operation -> {
+                if (operation instanceof ListInsertOperation<TodoItem> insertOp) {
+                    return insertOp.value().text().length() <= 5 ?
+                            ValidationResult.allow() :
+                            ValidationResult.reject("Long todo items are not allowed");
+                }
+                return ValidationResult.allow();
+            });
+
     private final ListSignal<TodoItem> adminSignal = todoItems
-            .withRemovalValidator(operation ->
-                    ValidationResult.rejected("Removing todo items is not allowed"));
-//    private final ListSignal<TodoItem> userSignal = adminSignal
-//            .withInsertionValidator(operation ->
-//                    ValidationResult.rejected("Read-only todo list"));
-    private final ListSignal<TodoItem> userSignal = todoItems.asReadOnly();
+            .withOperationValidator(operation -> {
+                if (operation instanceof ListRemoveOperation<TodoItem> removeOp) {
+                    return ValidationResult.reject("Removing todo items is not allowed");
+                }
+                return ValidationResult.allow();
+            });
+
+    private final ListSignal<TodoItem> userSignal = todoItems.asReadonly();
 
     private final AuthenticatedUser authenticatedUser;
 

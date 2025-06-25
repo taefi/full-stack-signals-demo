@@ -7,11 +7,9 @@ import {
 } from "@vaadin/hilla-react-signals";
 import {useEffect} from "react";
 import {
-  Checkbox,
+  DatePicker,
   HorizontalLayout, Icon,
-  IntegerField,
-  type IntegerFieldValueChangedEvent,
-  type TextFieldValueChangedEvent
+  Notification,
 } from "@vaadin/react-components";
 import {TextField} from "@vaadin/react-components/TextField";
 import {Button} from "@vaadin/react-components/Button.js";
@@ -27,10 +25,6 @@ export const config: ViewConfig = {
   title: 'Person List Signal',
 };
 
-function getNumber(value: string) {
-    return value === undefined || value === '' ? 0 : parseInt(value);
-}
-
 function PersonEditor({rowNum, item, onRemove}: { rowNum: number, item: ValueSignal<Person>, onRemove: (signal: ValueSignal<Person>) => void }) {
 
   const editing = useSignal(false);
@@ -44,11 +38,11 @@ function PersonEditor({rowNum, item, onRemove}: { rowNum: number, item: ValueSig
       <h4>{rowNum} -</h4>
       <TextField label='Name'
                  value={item.value.name}
-                 onValueChanged={(e) => item.value = {name: e.detail.value, age: item.value.age}}
+                 onValueChanged={(e) => item.value = {name: e.detail.value, birthDate: item.value.birthDate}}
                  readonly={!editing.value} />
-      <TextField label='Age'
-                 value={item.value.age.toString()}
-                 onValueChanged={(e) => item.value = {name: item.value.name, age: getNumber(e.detail.value)}}
+      <DatePicker label='Birth date'
+                 value={item.value.birthDate}
+                 onValueChanged={(e) => item.value = {name: item.value.name, birthDate: e.detail.value}}
                  readonly={!editing.value} />
       <Button theme="icon" disabled={editing.value} onClick={() => editing.value = true}><Icon icon="vaadin:pencil" /></Button>
       <Button theme="icon" hidden={!editing.value}
@@ -57,11 +51,6 @@ function PersonEditor({rowNum, item, onRemove}: { rowNum: number, item: ValueSig
     </HorizontalLayout>
   );
 }
-
-function setPersonName(e: TextFieldValueChangedEvent, name: Signal<string>) { name.value = e.detail.value; }
-function getPersonName(name: Signal<string>) { return name.value; }
-function setPersonAge(e: IntegerFieldValueChangedEvent, age: Signal<number>) { age.value = getNumber(e.detail.value); }
-function getPersonAge(age: Signal<number>) { return age.value; }
 
 const personList: ListSignal<Person> = PersonService.personListSignal();
 
@@ -73,7 +62,7 @@ export default function PersonListSignal() {
   }, [rendering.value]);
 
   const name = useSignal('');
-  const age = useSignal(0);
+  const birthDate = useSignal('');
 
   return (
     <VerticalLayout theme="padding">
@@ -86,12 +75,17 @@ export default function PersonListSignal() {
           <PersonEditor rowNum={index + 1} item={item} onRemove={(signal) => personList.remove(signal)} key={item.id} />)
       }
       <HorizontalLayout theme="spacing padding" style={{ alignItems: 'BASELINE' }}>
-        <TextField label='Name:' value={getPersonName(name)} placeholder="What's your name?" onValueChanged={(e => setPersonName(e, name))} />
-        <IntegerField label='Age:' value={getPersonAge(age).toString()} placeholder="How old are you?" onValueChanged={(e => setPersonAge(e, age))} />
+        <TextField label='Name:' value={ name.value } placeholder="What's your name?" onValueChanged={(e => name.value = e.detail.value)} />
+        <DatePicker label='Birth date:' value={ birthDate.value } placeholder="How old are you?" onValueChanged={(e => birthDate.value = e.detail.value)} />
         <Button onClick={() => {
-          personList.insertLast({name: getPersonName(name), age: getPersonAge(age)});
-          name.value = '';
-          age.value = 0;
+          personList.insertLast({name: name.value, birthDate: birthDate.value})
+            .result
+            .then(() => {
+              name.value = '';
+              birthDate.value = '';
+            })
+            .catch(() => Notification.show('Server rejected the new value, please try again.', { theme: 'error' }))
+
         }}>Add</Button>
       </HorizontalLayout>
     </VerticalLayout>

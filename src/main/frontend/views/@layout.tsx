@@ -5,7 +5,7 @@ import { Avatar } from '@vaadin/react-components/Avatar.js';
 import { Button } from '@vaadin/react-components/Button.js';
 import { useAuth } from 'Frontend/util/auth.js';
 import { Suspense, useEffect } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import '@vaadin/icons';
 import {MenuService} from "Frontend/generated/endpoints.js";
 
@@ -32,7 +32,7 @@ export default function MainLayout() {
 
   const { state, logout } = useAuth();
   const profilePictureUrl =
-    state.user &&
+    state.user && state.user.profilePicture &&
     `data:image;base64,${btoa(
       state.user.profilePicture.reduce((str, n) => str + String.fromCharCode((n + 256) % 256), ''),
     )}`;
@@ -58,9 +58,9 @@ export default function MainLayout() {
                 {state.user.name}
               </div>
               <Button
-                onClick={async () => {
-                  await logout();
-                  document.location.reload();
+                onClick={() => {
+                  logout();
+                  // document.location.reload();
                 }}
               >
                 Sign out

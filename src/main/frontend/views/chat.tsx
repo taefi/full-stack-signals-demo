@@ -1,7 +1,7 @@
-import {type ListSignal, useComputed, useSignal, type ValueSignal} from "@vaadin/hilla-react-signals";
+import {effect, type ListSignal, useComputed, useSignal, type ValueSignal} from "@vaadin/hilla-react-signals";
 import {ViewConfig} from "@vaadin/hilla-file-router/types.js";
 import {VerticalLayout} from "@vaadin/react-components/VerticalLayout";
-import {AvatarGroup, HorizontalLayout, Icon, Scroller, TextArea} from "@vaadin/react-components";
+import {AvatarGroup, HorizontalLayout, Icon, Notification, Scroller, TextArea} from "@vaadin/react-components";
 import {Button} from "@vaadin/react-components/Button";
 
 import type Message from "Frontend/generated/com/github/taefi/services/ChatService/Message.js";
@@ -24,7 +24,11 @@ function MessageEditor({message, onRemove, isMyMessage}: {
 }) {
   return (
     <HorizontalLayout theme='spacing' style={{ alignItems: 'BASELINE' }}>
-      <TextArea readonly={true} label={isMyMessage ? 'Me:' : message.value.author + ':'} value={message.value.text} />
+      <TextArea readonly={true}
+                label={isMyMessage ? 'Me:' : message.value.author + ':'}
+                value={message.value.text}
+                helperText={message.value.timestamp}
+      />
       <Button hidden={!isMyMessage} theme="icon error" onClick={() => onRemove(message)}><Icon icon="vaadin:trash" /></Button>
     </HorizontalLayout>
   );
@@ -38,7 +42,7 @@ function ChatComponent({ username } : { username: string }) {
       <h3>Welcome {username}!</h3>
       <span>The word "bad" is not allowed in this chat, and the message will not be accepted!</span>
       <span>But, you can be creative by saying things like "b-a-d" or "B A D"</span>
-      <Scroller style={{height: '70vh',
+      <Scroller style={{height: '65vh',
         width: '100%',
         borderBottom: '1px solid var(--lumo-contrast-20pct)',
         borderTop: '1px solid var(--lumo-contrast-20pct)',
@@ -58,8 +62,10 @@ function ChatComponent({ username } : { username: string }) {
                   onValueChanged={(e => newMessage.value = e.detail.value)}
                   style={{height: '66px'}}/>
         <Button onClick={() => {
-          chatChannel.insertLast({text: newMessage.value, author: username});
-          newMessage.value = '';
+          chatChannel.insertLast({text: newMessage.value, author: username, timestamp: new Date().toISOString()})
+            .result
+            .then(() => newMessage.value = '')
+            .catch(() => Notification.show('The message was not accepted!'));
         }} disabled={newMessage.value === ''}>Send</Button>
       </HorizontalLayout>
     </VerticalLayout>
@@ -83,7 +89,9 @@ function JoinedUsers() {
 
 const chatChannel: ListSignal<Message> = ChatService.chatChannel();
 const joinedUsers: ListSignal<User> = ChatService.joinedUsers();
+const  closer = effect(() => {
 
+});
 export default function ChatView() {
   const { state, logout } = useAuth();
 
@@ -91,18 +99,14 @@ export default function ChatView() {
     if (!state.user) {
       return;
     }
-    if (joinedUsers.value.some(user => user.value.id === state.user!.id)) {
-      joinedUsers.value.filter(user => user.value.id === state.user!.id)
-                       .forEach(user => joinedUsers.remove(user));
-    }
+    joinedUsers.value.filter(u => u.value.username === state.user!.username)
+                        .forEach(u => joinedUsers.remove(u));
     joinedUsers.insertLast(state.user);
 
     return () => {
       if (state.user) {
-        const found = joinedUsers.value.find(u => u.value.id === state.user!.id);
-        if (found) {
-          joinedUsers.remove(found);
-        }
+        joinedUsers.value.filter(u => u.value.username === state.user!.username)
+                            .forEach(u => joinedUsers.remove(u));
       }
     }
   }, []);
@@ -110,7 +114,7 @@ export default function ChatView() {
   return (
     <>
       <JoinedUsers />
-      <ChatComponent username={state.user!.name} />
+      <ChatComponent username={state.user!.name!} />
     </>
   );
 }

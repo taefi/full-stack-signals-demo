@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Set;
 
@@ -27,6 +28,7 @@ public class User extends AbstractEntity {
     @Column(length = 1000000)
     private byte[] profilePicture;
 
+    @NotNull
     public String getUsername() {
         return username;
     }
@@ -51,6 +53,7 @@ public class User extends AbstractEntity {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+    @NotNull
     public byte[] getProfilePicture() {
         return profilePicture;
     }
