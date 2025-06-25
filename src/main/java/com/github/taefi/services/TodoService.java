@@ -6,8 +6,6 @@ import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.signals.ListSignal;
 import com.vaadin.hilla.signals.operation.ListInsertOperation;
 import com.vaadin.hilla.signals.operation.ListRemoveOperation;
-import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
-import com.vaadin.hilla.signals.operation.SetValueOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
 
 @BrowserCallable
