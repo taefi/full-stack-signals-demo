@@ -21,14 +21,15 @@ function sleep(ms: number) {
 export default function NumberSignalView() {
 
   const numberOfSentRequests = useSignal(0);
+  const numberOfAcceptedVotes = useSignal(0);
 
   useEffect(() => {
     if (!votingStarted.value) {
       return;
     }
     const runWithDelay = async () => {
-      for (let i = 0; i < 1000; i++) {
-          counter.incrementBy(1);
+      for (let i = 0; i < 25; i++) {
+          counter.update(value => value + 1).result.then(_ => numberOfAcceptedVotes.value++);
           numberOfSentRequests.value++;
         await sleep(1);
       }
@@ -47,12 +48,15 @@ export default function NumberSignalView() {
       <Button onClick={() => {
         counter.value = 0;
         numberOfSentRequests.value = 0;
+        numberOfAcceptedVotes.value = 0;
       }}>Reset</Button>
       <br />
       Is voting in progress: {votingStarted.value ? 'Yes' : 'No'}
       <Button onClick={() => votingStarted.value = !votingStarted.value} theme={votingStarted.value ? 'error' : ''}>{votingStarted.value ? 'Stop' : 'Start'} Voting</Button>
       <br />
-      {numberOfSentRequests.value > 0 ? <span>Sent {numberOfSentRequests.value} requests</span> : ''}
+      <span>Sent {numberOfSentRequests.value} requests</span>
+      <br />
+      <span>Accepted votes: {numberOfAcceptedVotes.value}</span>
     </VerticalLayout>
   );
 }

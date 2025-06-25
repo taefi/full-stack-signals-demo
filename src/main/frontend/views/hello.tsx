@@ -1,7 +1,7 @@
 import {VerticalLayout} from "@vaadin/react-components/VerticalLayout";
 import {TextField} from "@vaadin/react-components/TextField";
 import {Button} from "@vaadin/react-components/Button";
-import {HelloWorldService, TestFlux} from "Frontend/generated/endpoints";
+import {HelloWorldService} from "Frontend/generated/endpoints";
 import '@vaadin/icons';
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 import {useSignal} from "@vaadin/hilla-react-signals";
@@ -12,8 +12,6 @@ export const config: ViewConfig = {
   menu: { order: 6, icon: 'vaadin:handshake' },
   title: 'Hello World',
 };
-
-// const subs = TestFlux.testFlux('test', true);
 
 export default function HelloView() {
 

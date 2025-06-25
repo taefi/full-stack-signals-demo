@@ -1,7 +1,7 @@
 package com.github.taefi.services;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.hilla.Nullable;
+import org.jspecify.annotations.Nullable;
 import com.vaadin.hilla.signals.NumberSignal;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.signals.ValueSignal;
@@ -22,11 +22,22 @@ public class NumberSignalService {
         return counter;
     }
 
-    public NumberSignal sharedValue(boolean isHigh, @Email String email) {
+    /*public NumberSignal sharedValue(boolean isHigh, @Email String email) {
+        return isHigh ? highValue : lowValue;
+    }*/
+    public NumberSignal sharedValue(boolean isHigh) {
         return isHigh ? highValue : lowValue;
     }
 
     public ValueSignal<@Nullable Boolean> startTrigger() {
         return startTrigger;
+    }
+
+    public ValueSignal<Boolean> startTriggerNotNull() {
+        return startTrigger;
+    }
+
+    public ValueSignal<Double> highValue() {
+        return highValue;
     }
 }
